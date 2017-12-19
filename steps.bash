@@ -1,10 +1,10 @@
 sudo pip install -U nltk
-sudo python -m nltk.downloader maxent_treebank_pos_tagger
-sudo python -m nltk.downloader punkt
-sudo python -m nltk.downloader averaged_perceptron_tagger
-sudo python -m nltk.downloader nltk_stopwords
-sudo python -m nltk.downloader stopwords
-sudo python -m nltk.downloader wordnet
+NLTK_DATA=~/
+sudo python -m nltk.downloader maxent_treebank_pos_tagger -d ~/nltk_data
+sudo python -m nltk.downloader punkt -d ~/nltk_data
+sudo python -m nltk.downloader averaged_perceptron_tagger -d ~/nltk_data
+sudo python -m nltk.downloader stopwords -d ~/nltk_data
+sudo python -m nltk.downloader wordnet -d ~/nltk_data
 
 sudo yum install git
 git clone https://github.com/trilaiclub/nltk-api.git
