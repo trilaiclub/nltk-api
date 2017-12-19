@@ -11,4 +11,6 @@ git clone https://github.com/trilaiclub/nltk-api.git
 curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -
 sudo yum -y install nodejs
 npm install loopback
+npm install -g forever
+forever start --verbose --append --uid \"nltk\" --watch --watchDirectory ./server server/server.js --spinSleepTime 1000ms
 
