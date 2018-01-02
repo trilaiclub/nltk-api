@@ -1,50 +1,40 @@
 #!/usr/bin/env python
 
-import os
+from os.path import expanduser
 import sys
 import nltk
-from os.path import expanduser, exists
-from nltk.tokenize import RegexpTokenizer
-from nltk.chunk.regexp import RegexpParser, RegexpChunkParser
+from nltk.chunk.regexp import RegexpChunkParser
 from nltk.chunk.regexp import ChunkString, ChunkRule, ChinkRule, MergeRule, SplitRule
 from nltk.tree import Tree
 from nltk import draw
 import json
 
+home = expanduser("~")
+nltk.data.path.append(home + '/nltk_data/')
+
+
 global t
 global next_input
+input = ' '.join(sys.argv[1:])
+output = ''
+tag = "SBG"
+
+wnl = nltk.stem.WordNetLemmatizer()
+
 
 #Private definitions begin
 
-def pre_process(text):
-   tokenizer = RegexpTokenizer(r'(\w+|\d+)')
-   tokens = tokenizer.tokenize(text)
-   return tokens
-
 def apply_grammar(text):
-  tagged = nltk.pos_tag(text.split(' '))
-  grammar = read_grammar('grammar.cfg')
-  print grammar
-  parser = RegexpParser(grammar)
-  print parser
-  chunked_text = parser.parse(tagged)
+  tokens = nltk.word_tokenize("%s" % text)
+  tokens = filter(lambda word: word not in ',-!@#$%^&*()_+={}[]:;"\'<>.?/~`|\\', tokens)
+  tagged = nltk.pos_tag(tokens)
+  chunk_rule = ChunkRule("(<[A-M O-Z].*>+)?<N.*>?", "Chunk every noun")
+  chink_rule = ChinkRule("<CC>", "Nothing")
+  split_rule = SplitRule("<CD>", "<[A-Z].*>", "Split IN and CD")
+  merge_rule = MergeRule("<NN.*>", "<CD>", "Merge CD into previous proper noun")
+  chunk_parser = RegexpChunkParser([chunk_rule, chink_rule, split_rule, merge_rule], chunk_label=tag)
+  chunked_text = chunk_parser.parse(tagged)
   return plant_a_tree(chunked_text)
-
-def read_grammar(fileName):
-   result = ''
-   filePath = "%s/%s" % (grammar_path, fileName)
-   try:
-       if os.path.exists(filePath):
-          f = open(filePath,"r")
-          result = f.read()
-   except Exception as inst:
-       print "Couldn't read the grammar file (%s)" % (filePath);
-       print inst
-       stop(-1)
-   return result
-
-def stop(status):
-   exit(status)
 
 def extract_tag(psent):
   for subtree in psent.subtrees():
@@ -54,9 +44,9 @@ def extract_tag(psent):
 def plant_a_tree(text):
    return Tree.fromstring(str(text), read_leaf=lambda x: x.split("/"))
 
-def run(ninput):
-   if len(ninput) > 0:
-      tree = apply_grammar(ninput)
+def run(next_input):
+   if len(next_input) > 0:
+      tree = apply_grammar(next_input)
    else:
       tree = Tree.fromstring(str("(S )"))
    return tree   
@@ -69,22 +59,13 @@ def replace_word(text, next_value):
 #private definitions end
 
 
-home = expanduser("~")
-nltk.data.path.append(home + '/nltk_data/')
-app_path = "%s/nltk-api" % (home)
-client_path = "%s/client" % (app_path)
-grammar_path = "%s/grammar" % (client_path)
+#chunk_rule = ChunkRule("(<[A-M O-Z].*>+)?<N.*>?", "Chunk every noun")
+#chink_rule = ChinkRule("<IN|CD>+", "Chink every thing")
+#merge_rule = MergeRule("<N.*>", "<CD>", "Merge CD")
+#chunk_parser = RegexpChunkParser([chunk_rule, chink_rule, merge_rule], chunk_label=tag)
+#chunked_text = chunk_parser.parse(tagged)
 
-input = ' '.join(sys.argv[1:])
-tokens = nltk.word_tokenize("%s" % input)
-tokens = filter(lambda word: word not in ',-!@#$%^&*()_+={}[]:;"\'<>.?/~`|\\', tokens)
-print tokens
-input = ' '.join(tokens)
-print input
-output = ''
-tag = "SBG"
-stop(0)
-wnl = nltk.stem.WordNetLemmatizer()
+
 
 t = apply_grammar(input)
 print t

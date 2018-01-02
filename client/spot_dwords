@@ -6,7 +6,6 @@ import nltk
 from os.path import expanduser, exists
 from nltk.tokenize import RegexpTokenizer
 from nltk.chunk.regexp import RegexpParser, RegexpChunkParser
-from nltk.chunk.regexp import ChunkString, ChunkRule, ChinkRule, MergeRule, SplitRule
 from nltk.tree import Tree
 from nltk import draw
 import json
@@ -24,9 +23,9 @@ def pre_process(text):
 def apply_grammar(text):
   tagged = nltk.pos_tag(text.split(' '))
   grammar = read_grammar('grammar.cfg')
-  print grammar
+  #print grammar
   parser = RegexpParser(grammar)
-  print parser
+  #print parser
   chunked_text = parser.parse(tagged)
   return plant_a_tree(chunked_text)
 
@@ -45,6 +44,7 @@ def read_grammar(fileName):
 
 def stop(status):
    exit(status)
+
 
 def extract_tag(psent):
   for subtree in psent.subtrees():
@@ -66,6 +66,14 @@ def replace_word(text, next_value):
    next_value = next_value.strip()
    return next_value
 
+def lemmatizer(phrase):
+   result = ''
+   wnl = nltk.stem.WordNetLemmatizer()
+   wtext = nltk.word_tokenize("%s" % phrase)
+   wtokens = nltk.pos_tag(wtext)
+   for wtoken,pos in wtokens:
+      result += wnl.lemmatize(wtoken) + ' '
+   return result[:-1]
 #private definitions end
 
 
@@ -78,43 +86,40 @@ grammar_path = "%s/grammar" % (client_path)
 input = ' '.join(sys.argv[1:])
 tokens = nltk.word_tokenize("%s" % input)
 tokens = filter(lambda word: word not in ',-!@#$%^&*()_+={}[]:;"\'<>.?/~`|\\', tokens)
-print tokens
+#print tokens
 input = ' '.join(tokens)
-print input
+#print input
 output = ''
 tag = "SBG"
-stop(0)
-wnl = nltk.stem.WordNetLemmatizer()
+
 
 t = apply_grammar(input)
-print t
+#print t
 next_input = input
 
 while len(t) > 0:
    op_tree = t[0] 
-   print op_tree
+   #print op_tree
    try:
       for word in extract_tag(op_tree):
-         print "----O" + word
-         output += word +  ","
+         #print "----O%s-" % word
          next_input = replace_word(word, next_input)
-         print "----O" + next_input
+         word = lemmatizer(word)
+         #print "lemmatize(" + word
+         output += word +  ","
+         #print "----O" + next_input
          t = run(next_input)
-         print "++++"
-         print t
-         print "==================================================="
+         #print "++++"
+         #print t
+         #print "==================================================="
    except AttributeError:
-      print t[0][0]
+      #print t[0][0]
       next_input = replace_word(t[0][0], next_input)
       t = run(next_input)
-#chunks = extract_tag(chunked_text)
-#for word in extract_tag(chunked_text):
-#  chunked_text = apply_grammar(input)
-#   print word
-#  word = wnl.lemmatize(word)
-#  if pos.startswith('N'):
-#    output += word + ','
-#  else:
-#    output += word + ' '
+   except Exception as inst:
+       print inst
+       stop(-1)
+
+
 print output[:-1]
 

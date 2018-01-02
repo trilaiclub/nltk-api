@@ -1,0 +1,100 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import nltk
+import math, re, csv
+from datetime import datetime
+from collections import Counter
+from functools import reduce
+from nltk import word_tokenize
+from nltk.util import ngrams
+from os.path import expanduser, exists
+import json
+
+#Private definitions begin
+
+def read_history(fileName):
+   result = ''
+   filePath = "%s/%s" % (history_path, fileName)
+   try:
+       if os.path.exists(filePath):
+          f = open(filePath,"r")
+          result = f.read()
+   except Exception as inst:
+       print "Couldn't read the grammar file (%s)" % (filePath);
+       print inst
+       stop(-1)
+   return result
+
+def chunk_list(lst, n):
+    return [tuple(lst[i:i+n]) for i in range(len(lst)-n)]
+
+def tokenize(input_file, encoding):
+    lst =[]
+    file_path = "%s/%s" % (history_path, input_file)
+    #wnl = nltk.stem.WordNetLemmatizer()
+    #tokens = [wnl.lemmatize(token) for token in nltk.word_tokenize("%s" % input)]
+    with open(file_path, 'r') as f:
+        for sent in f:
+            sent = sent.lower()
+            sent = re.findall('\w+', sent)
+            for word in sent:
+                lst.append(word)
+    return lst
+
+def ngrams_split(lst, n):
+    return [' '.join(lst[i:i+n]) for i in range(len(lst)-n)]
+
+def count_ngrams(tokens, n_filter, n):
+    ngram_counts = []
+    word_count = len(tokens)
+    two_grams = chunk_list(tokens, 2)
+
+    for ngram, count in Counter(chunk_list(tokens, n)).items():
+	try:
+           if count >= n_filter:
+               ngram_freq = math.log(count/word_count, 10)
+               num = count*word_count
+
+               cgrams = [two_grams.count((ngram[i], ngram[i+1])) for i in range(n-1)]
+               freqs = [tokens.count(word) for word in ngram]
+               product = reduce(lambda x, y: x*y, freqs)
+
+               mi = math.pow(math.log(num/(product), 10), 2)
+
+               probs = [cgram/freq for cgram, freq in zip(cgrams, freqs)]
+               ngram_prob = sum(math.log(prob, 10) for prob in probs)
+               ngram_counts.append((ngram_freq, mi, ngram_prob, count, ngram))
+	except Exception as inst:
+	   print inst
+	   continue
+
+    return ngram_counts
+
+def n_grams_stat(input_file, encoding, n_filter, n):
+    tokens = tokenize(input_file, encoding)
+    return count_ngrams(tokens, n_filter, n)
+
+def stop(status):
+   exit(status)
+
+#private definitions end
+
+
+home = expanduser("~")
+nltk.data.path.append(home + '/nltk_data/')
+app_path = "%s/nltk-api" % (home)
+client_path = "%s/client" % (app_path)
+grammar_path = "%s/grammar" % (client_path)
+history_path = "%s/history" % (client_path)
+
+
+ngram = sys.argv[1]
+fileName = sys.argv[2]
+print "Input: %s , %s" % (ngram, fileName)
+
+s = n_grams_stat(fileName,encoding='utf-8', n_filter=3, n=int(ngram))
+for tup in s:
+        print(tup)
+stop(0)

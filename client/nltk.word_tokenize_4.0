@@ -46,6 +46,7 @@ def read_grammar(fileName):
 def stop(status):
    exit(status)
 
+
 def extract_tag(psent):
   for subtree in psent.subtrees():
     if subtree.label() == tag:
@@ -83,7 +84,7 @@ input = ' '.join(tokens)
 print input
 output = ''
 tag = "SBG"
-stop(0)
+
 wnl = nltk.stem.WordNetLemmatizer()
 
 t = apply_grammar(input)
@@ -107,14 +108,6 @@ while len(t) > 0:
       print t[0][0]
       next_input = replace_word(t[0][0], next_input)
       t = run(next_input)
-#chunks = extract_tag(chunked_text)
-#for word in extract_tag(chunked_text):
-#  chunked_text = apply_grammar(input)
-#   print word
-#  word = wnl.lemmatize(word)
-#  if pos.startswith('N'):
-#    output += word + ','
-#  else:
-#    output += word + ' '
+
 print output[:-1]
 

@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+from os.path import expanduser
+import sys
+import nltk
+from nltk.chunk import *
+from nltk.chunk.util import *
+from nltk.chunk.regexp import *
+from nltk import Tree
+import json
+
+home = expanduser("~")
+nltk.data.path.append(home + '/nltk_data/')
+
+input = ' '.join(sys.argv[1:])
+text = nltk.word_tokenize("%s" % input)
+taggedSent = nltk.pos_tag(text)
+output = ''
+wnl = nltk.stem.WordNetLemmatizer()
+tagged_text = "[ The/DT cat/NN ] sat/VBD on/IN [ the/DT mat/NN ] [ the/DT dog/NN ] chewed/VBD ./."
+gold_chunked_text = tagstr2tree(tagged_text)
+unchunked_text = gold_chunked_text.flatten()
+chunk_rule = ChunkRule("(<[A-M O-Z].*>+)?<N.*>?", "Chunk everything")
+chink_rule = ChinkRule("<.*>", "Chink on verbs/prepositions")
+split_rule = SplitRule("<.*><N*>", "<.*><N*>", "Split by noun")
+chunk_parser = RegexpChunkParser([chunk_rule], chunk_label='NP')
+chunked_text = chunk_parser.parse(taggedSent)
+print(chunked_text)
+#for word, pos in taggedSent:
+#  word = wnl.lemmatize(word)
+#  if pos.startswith('N'):
+#    output += word + ','
+#  else:
+#    output += word + ' '
+#print output[:-1]
+

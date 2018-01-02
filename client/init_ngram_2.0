@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import nltk
+import re
+import collections
+from nltk import word_tokenize
+from nltk.util import ngrams
+from os.path import expanduser, exists
+import json
+
+#Private definitions begin
+
+def read_history(fileName):
+   result = ''
+   filePath = "%s/%s" % (history_path, fileName)
+   try:
+       if os.path.exists(filePath):
+          f = open(filePath,"r")
+          result = f.read()
+   except Exception as inst:
+       print "Couldn't read the grammar file (%s)" % (filePath);
+       print inst
+       stop(-1)
+   return result
+
+def tokenize(input_file, encoding):
+    lst =[]
+    file_path = "%s/%s" % (history_path, input_file)
+    #wnl = nltk.stem.WordNetLemmatizer()
+    #tokens = [wnl.lemmatize(token) for token in nltk.word_tokenize("%s" % input)]
+    with open(file_path, 'r') as f:
+        for sent in f:
+            sent = sent.lower()
+            sent = re.findall('\w+', sent)
+            for word in sent:
+                lst.append(word)
+    return lst
+
+def stop(status):
+   exit(status)
+
+#private definitions end
+
+
+home = expanduser("~")
+nltk.data.path.append(home + '/nltk_data/')
+app_path = "%s/nltk-api" % (home)
+client_path = "%s/client" % (app_path)
+grammar_path = "%s/grammar" % (client_path)
+history_path = "%s/history" % (client_path)
+
+
+ngram = sys.argv[1]
+fileName = sys.argv[2]
+print "Input: %s , %s" % (ngram, fileName)
+tokens = tokenize(fileName, 'utf-8')
+output = ngrams(tokens, ngram)
+
+fdist = nltk.FreqDist(output)
+for k,v in fdist.items():
+    print k,v
+
+stop(0)
