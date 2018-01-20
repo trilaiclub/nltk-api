@@ -7,6 +7,9 @@ sudo python -m nltk.downloader stopwords -d ~/nltk_data
 sudo python -m nltk.downloader wordnet -d ~/nltk_data
 sudo python -m nltk.downloader tagsets -d ~/nltk_data
 
+sudo pip install pymongo
+sudo pip install cement
+
 sudo yum install git
 git clone https://github.com/trilaiclub/nltk-api.git
 curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -

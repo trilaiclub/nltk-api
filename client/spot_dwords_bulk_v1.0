@@ -45,29 +45,21 @@ def read_config(fileName):
 def tokenize(input_file, encoding):
     lst =[]
     file_path = "%s/%s" % (history_path, input_file)
-    ng_limit = int(config['ngrams']['limit']) + 1
     #wnl = nltk.stem.WordNetLemmatizer()
     #tokens = [wnl.lemmatize(token) for token in nltk.word_tokenize("%s" % input)]
     with open(file_path, 'r') as f:
         for sent in f:
             sent = sent.lower()
-            asent = sent
             sent = re.findall('\w+', sent)
-  	    words = word_grams(sent, 1, ng_limit)
-	    print words 
+            for word in sent:
+                lst.append(word)
     return lst
-
-def word_grams(words, min=1, max=4):
-    s = []
-    for n in range(min, max):
-        for ngram in ngrams(words, n):
-            s.append(' '.join(str(i) for i in ngram))
-    return s
 
 def stop(status):
    exit(status)
 
 #private definitions end
+
 
 home = expanduser("~")
 nltk.data.path.append(home + '/nltk_data/')

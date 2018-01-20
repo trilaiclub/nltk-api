@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+import nltk
+from nltk.collocations import *
+from topik.tokenizers import ngrams, entities
+
+bigram_measures = nltk.collocations.BigramAssocMeasures()
+trigram_measures = nltk.collocations.TrigramAssocMeasures()
+
+# Ngrams with 'creature' as a member
+creature_filter = lambda *w: 'creature' not in w
+
+filePath = "./history/search.clue"
+f = open(filePath,"r")
+input = f.read()
+bi_output = entities(input, min_length=1, freq_min=2, freq_max=10000)
+#bi_output = ngrams(input, freq_bounds=[(5,10000), (3, 10000)])
+for i, j in bi_output:
+  print("{0} {1} {2}".format(i[0], i[1], j))
+print tokens
+## Bigrams
+finder = BigramCollocationFinder.from_words(input)
+# only bigrams that appear 3+ times
+print finder.apply_freq_filter(2)
+# only bigrams that contain 'creature'
+finder.apply_ngram_filter(creature_filter)
+# return the 10 n-grams with the highest PMI
+print finder.nbest(bigram_measures.likelihood_ratio, 1)
+
+
+## Trigrams
+#finder = TrigramCollocationFinder.from_words(
+#   nltk.corpus.genesis.words('english-web.txt'))
+# only trigrams that appear 3+ times
+#finder.apply_freq_filter(3)
+# only trigrams that contain 'creature'
+#finder.apply_ngram_filter(creature_filter)
+# return the 10 n-grams with the highest PMI
+#print finder.nbest(trigram_measures.likelihood_ratio, 10)

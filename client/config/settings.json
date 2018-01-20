@@ -1,0 +1,20 @@
+{
+    "mongodb":{
+        "host":"localhost",
+        "user":"root",
+        "password":"",
+        "database":"Reco",
+	"port":"27017"
+    },
+    "ngrams":{
+	"limit": 3
+    },
+    "other":{
+        "preprocessing_queue":[
+            "preprocessing.scale_and_center",
+            "preprocessing.dot_reduction",
+            "preprocessing.connect_lines"
+            ],
+        "use_anonymous":true
+    }
+}
